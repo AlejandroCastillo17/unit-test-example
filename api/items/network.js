@@ -2,94 +2,78 @@ const { Router } = require('express');
 const response = require('../../network/response')
 const router = Router();
 const ctrl = require('./index');
-const {tiMonth, fuelEnergySelector, electricalConsumption, costElectricalKM, combustionConsumption, fuelConsumption, fuelEfficiency, fuelCostKm} = require('../../calculators/environment')
+const {tiMonth, fuelEnergySelector, electricalConsumption, costElectricalKM, combustionConsumption, fuelConsumption, fuelEfficiency, fuelCostKm, energyKm,emisionKm,savedEnergy,avoidedEmissions,monthlySavings,annualSavings,youngTree, oldTree, energyH2Cylinders, energyH2LowPresure, energyConsumed, hydrogenMass, litersRequired} = require('../../calculators/environment')
 const { areaCirculo } = require('../../calculators/calculo1')
-
 const tableInjected = 'my_table'
 
-router.get('/env_test/:fuel', async (req, res) => {
-    const fuel = req.params.fuel
-
-    const electrical_consumption = electricalConsumption(81.14, 200)
-    const combustion_consumption = combustionConsumption(electrical_consumption)
-    const fuel_selector = fuelEnergySelector(fuel)
-    const fuel_consuption = fuelConsumption(combustion_consumption, fuel_selector["fuel_energy"])
-
+router.get('/Prueba/:ipc/:cmb/:ne/:an', (req, res) => {
     try {
-        const list = {
-            "month_inflation": tiMonth(2.8),
-            "fuel_selected": fuel_selector,
-            "electrical_consuption": electrical_consumption, 
-            "cost_electrical_km": costElectricalKM(electrical_consumption, 238.25), 
-            "combustion_consuption": combustion_consumption, 
-            "fuel_consuption": fuel_consuption,
-            "fuel_eficiency": fuelEfficiency(fuel_consuption),
-            "fuel_cost_km": fuelCostKm(16700, fuel_consuption),
-            "Texto": 10
-        }
-        response.success(req, res, list, 200);    
+        const annual_use=2;
+        const ipc= tiMonth(parseFloat(req.params.ipc))
+        const FuEnSe = fuelEnergySelector(req.params.cmb)
+        const ElCo= electricalConsumption(parseFloat(req.params.ne),parseFloat(req.params.an))
+        const CoElKm = costElectricalKM(ElCo,3);
+        const CoCo =combustionConsumption(ElCo);
+        const FuCo= fuelConsumption(CoCo,FuEnSe.fuel_energy)
+        const FuEf=fuelEfficiency(FuCo);
+        const FuCos=fuelCostKm(FuEnSe.fuel_price,FuCo)
+        const EnKm=energyKm(CoCo);
+        const EmKm=emisionKm(FuEnSe.emision_factor,EnKm);
+        const SaEn=savedEnergy(CoCo,ElCo,annual_use);
+        const AvEm=avoidedEmissions(EmKm,annual_use);
+        const MoSa=monthlySavings(FuCo,CoElKm,annual_use);
+        const AnSa=annualSavings(MoSa,ipc);
+        const YoTr=youngTree(AvEm);
+        const OlTr=oldTree(AvEm);
+        const EnLi=energyH2Cylinders(req.params.ne);
+        const EnLo=energyH2LowPresure(EnLi);
+        const En_Co=energyConsumed(EnLo);
+        const HyMa=hydrogenMass(EnLo);
+        const LiRe=litersRequired(HyMa);
+  
+
+
+        let list ={}
+        list["it_Month"]=ipc
+        list["fuel_energy_selector"]=FuEnSe;
+        list["electrical_consopcion"]=ElCo;
+        list["costElectricalKM"]=CoElKm;
+        list["combustionConsumption"]=CoCo;
+        list["fuelConsumption"] = FuCo;
+        list["fuelEfficiency"] = FuEf;
+        list["fuelCostKm"] = FuCos;
+        list["energyKm"]=EnKm;
+        list["emisionKm"]=EmKm;
+        list["savedEnergy"]=SaEn;
+        list["avoidedEmissions"]=AvEm;
+        list["monthlySavings"] = MoSa;
+        list["annualSavings"]=AnSa;
+        list["youngTree"]=YoTr;
+        list["oldTree"]=OlTr;
+        list["energyH2Cylinders"]=EnLi;
+        list["energyH2LowPresure"]=EnLo;
+        list["energyConsumed"]=En_Co;
+        list["hydrogenMass"]=HyMa;
+        list["litersRequired"]=LiRe;
+
+        console.log("networkj:",YoTr)
+
+        response.success(req, res,list, 200);    
     } catch (error) {
         response.error(req, res, error.message, 500); 
     }
+    
+
+   
 })
 
-router.get('/list', async (req, res) => {
+router.get('/Prueba', (req, res) => {
     try {
-        const id = req.params.id
-        const list = await ctrl.list(tableInjected);
-        response.success(req, res, list, 200);    
-    } catch (error) {
-        response.error(req, res, error.message, 500); 
+        response.success(req,res,"Entraste",200)
+    }
+     catch(error) {
+        response.error(req, res,error.message,500)
     }
 })
-
-
-router.get('/test_network/:radio', async (req, res) => {
-    try {
-        const radio = req.params.radio
-        response.success(req, res, areaCirculo(radio), 200);    
-    } catch (error) {
-        response.error(req, res, error.message, 500); 
-    }
-})
-
-
-
-router.get('/:id', async (req, res) => {
-    try {
-        const id = req.params.id
-        const list = await ctrl.listById(tableInjected, id);
-        response.success(req, res, list, 200);    
-    } catch (error) {
-        response.error(req, res, error.message, 500); 
-    }
-})
-
-
-router.post('/add', async (req, res) => {
-    try {
-        await ctrl.addElement(tableInjected, data = {
-            "data": req.body.data,
-        });
-        response.success(req, res, `Item Created`, 200);    
-    } catch (error) {
-        response.error(req, res, error.message, 500);
-    }
-});
-
-
-router.put('/update', async (req, res) => {
-    try {
-        let { id, data } = req.body;
-        await ctrl.updateElement(tableInjected, data = {
-            "id": id,
-            "data": data,
-        });
-        response.success(req, res, `Item updated`, 200);     
-    } catch (error) {
-        response.error(req, res, error.message, 500);
-    }
-});
-
 
 module.exports = router ;

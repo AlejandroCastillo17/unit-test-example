@@ -103,39 +103,41 @@ const annualSavings = (monthly_savings, ipc_data) => {
     return annual_savings
 }
 
-const youngTree = async (avoided_emissions) => {
-    const tree = ((avoided_emissions*1000)/('young_tree'))
+const youngTree =(avoided_emissions) => {
+    const tree = ((avoided_emissions*1000)/(1))
+    console.log(tree)
+    return parseInt(tree)
+    
+}
+
+const oldTree = (avoided_emissions) => {
+    const tree = ((avoided_emissions*1000)/(1))
     return parseInt(tree)
 }
 
-const oldTree = async (avoided_emissions) => {
-    const tree = ((avoided_emissions*1000)/('old_tree'))
-    return parseInt(tree)
-}
-
-const energyH2Cylinders = async (nominal_energy) => {
-    const result = (nominal_energy/('cell_fuel_eficiency_factor'))
+const energyH2Cylinders = (nominal_energy) => {
+    const result = (nominal_energy/(1))
     return result
 }
 
-const energyH2LowPresure = async (energy_H2_Cylinders) => {
-    const result = (energy_H2_Cylinders/('compresor_eficiency_factor'))
+const energyH2LowPresure = (energy_H2_Cylinders) => {
+    const result = (energy_H2_Cylinders/(1))
     return result
 }
 
-const energyConsumed = async (energy_H2_Low_Presure) => {
-    const result = (energy_H2_Low_Presure/('electrolysis_eficiency_factor'))
+const energyConsumed = (energy_H2_Low_Presure) => {
+    const result = (energy_H2_Low_Presure/(1))
     return result
 }
 
 
-const hydrogenMass = async (energy_H2_Low_Presure) => {
-    const result = (energy_H2_Low_Presure/('hydrogen_energy_density'))
+const hydrogenMass = (energy_H2_Low_Presure) => {
+    const result = (energy_H2_Low_Presure/(1))
     return result
 }
 
-const litersRequired = async (hydrogen_mass) => {
-    const result = (hydrogen_mass*('water_h2_weight'))
+const litersRequired = (hydrogen_mass) => {
+    const result = (hydrogen_mass*(1))
     return result
 }
 
